@@ -3,4 +3,8 @@
 
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="title_activity_launch">LaunchActivity</string>
+
+    <string name="progress_bar_starting_dialog">Launching&#8230;</string>
+    <string name="progress_bar_asynctask_dialog">Downloading Database</string>
 </resources>
