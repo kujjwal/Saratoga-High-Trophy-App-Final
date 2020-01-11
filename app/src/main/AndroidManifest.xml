@@ -5,6 +5,10 @@
 
     <dist:module dist:instant="true" />
 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup"
@@ -14,16 +18,11 @@
         android:supportsRtl="true"
         android:testOnly="true"
         android:theme="@style/AppTheme">
-        <activity
-            android:name=".LaunchActivity"
-            android:label="@string/title_activity_launch"
-            android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+<!--        <activity-->
+<!--            android:name=".LaunchActivity"-->
+<!--            android:label="@string/title_activity_launch"-->
+<!--            android:theme="@style/AppTheme.NoActionBar">-->
+<!--        </activity>-->
         <activity
             android:name=".FullscreenActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -38,7 +37,15 @@
                     android:host="www.shstrophyapp.com"
                     android:scheme="app" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
     </application>
 
 </manifest>
