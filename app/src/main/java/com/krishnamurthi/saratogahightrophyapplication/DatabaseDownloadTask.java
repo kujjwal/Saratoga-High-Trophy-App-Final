@@ -1,6 +1,8 @@
 package com.krishnamurthi.saratogahightrophyapplication;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.widget.TextView;
@@ -13,15 +15,19 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.net.URL;
-import java.net.URLConnection;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
-public class DatabaseDownloadTask extends AsyncTask<Void, Void, String[]> {
-    private final String[] titles = {"sports", "trophies"};
+import static com.krishnamurthi.saratogahightrophyapplication.Constants.*;
+
+public class DatabaseDownloadTask extends AsyncTask<Void, Void, Boolean> {
+    private static String[] fileHashes = new String[GIDS.length];
     private WeakReference<Activity> foregroundActivity;
 
-    private static final String DOWNLOAD_URL = "https://docs.google.com/spreadsheets/d/" +
-            "1bCjaCRR1ezrEWUXnxYyPRpUK5nr6u3NTP7iEitLEyxo/export?gid=YOURGID&format=csv";
-    private static final String[] GIDS = {"0", "2132257028"};
 
     DatabaseDownloadTask(Activity activity) {
         this.foregroundActivity = new WeakReference<>(activity);
@@ -37,43 +43,56 @@ public class DatabaseDownloadTask extends AsyncTask<Void, Void, String[]> {
     }
 
     @Override
-    protected String[] doInBackground(Void... voids) {
+    protected Boolean doInBackground(Void... voids) {
         try {
-            String[] filePaths = new String[GIDS.length];
             for(int i = 0; i < GIDS.length; i++) {
                 String url = DOWNLOAD_URL.replace("YOURGID", GIDS[i]);
-                filePaths[i] = saveCSVs(url, titles[i]);
+                saveCSVs(url, titles[i], i);
             }
-            return filePaths;
         } catch (Exception e) {e.printStackTrace();}
-        return null;
+
+        boolean changes = false;
+        SharedPreferences prefs = foregroundActivity.get().getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        Set<String> newHashes = new HashSet<>();
+        Set<String> hashes = prefs.getStringSet("hashes", null);
+        if(hashes != null) {
+            int index = 0;
+            for(Iterator<String> it = hashes.iterator(); it.hasNext(); index++) {
+                if(!it.next().equals(fileHashes[index])) changes = true;
+                newHashes.add(fileHashes[index]);
+            }
+        } else {
+            changes = true;
+            Collections.addAll(newHashes, fileHashes);
+        }
+        editor.putStringSet("hashes", newHashes);
+        editor.apply();
+        return changes;
     }
 
-    @Override
-    protected void onPostExecute(String[] strings) {
-        super.onPostExecute(strings);
-
-    }
-
-    private String saveCSVs(String string, String title) throws IOException {
-        int count;
+    private void saveCSVs(String string, String title, int iteration) throws IOException, NoSuchAlgorithmException {
         URL url = new URL(string);
-        URLConnection conn = url.openConnection();
-        conn.connect();
+        url.openConnection().connect();
 
-        InputStream input = new BufferedInputStream(url.openStream(),8192);
-
+        MessageDigest md = MessageDigest.getInstance("SHA-1");
         File csv = new File(Environment.getExternalStorageDirectory().toString() + title + ".csv");
+        InputStream input = new BufferedInputStream(url.openStream(),8192);
         OutputStream output = new FileOutputStream(csv);
 
-        byte[] data = new byte[1024];
+        byte[] data = new byte[1024]; int count;
         while ((count = input.read(data)) != -1) {
             output.write(data, 0, count);
+            md.update(data, 0, count);
         }
+        output.flush(); output.close(); input.close();
 
-        output.flush();
-        output.close();
-        input.close();
-        return csv.getAbsolutePath();
+        byte[] bytes = md.digest();
+        StringBuilder sb = new StringBuilder();
+        for(byte by : bytes) {
+            sb.append(Integer.toString((by & 0xff) + 0x100, 16).substring(1));
+        }
+        fileHashes[iteration] = sb.toString();
+        //filePaths[iteration] = csv.getAbsolutePath(); //Filepaths not necessary since they stay constant
     }
 }
