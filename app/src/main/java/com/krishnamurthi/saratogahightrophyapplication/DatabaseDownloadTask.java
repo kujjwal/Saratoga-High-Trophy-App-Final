@@ -22,7 +22,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import static com.krishnamurthi.saratogahightrophyapplication.Constants.*;
+import static com.krishnamurthi.saratogahightrophyapplication.utils.Constants.*;
 
 public class DatabaseDownloadTask extends AsyncTask<Void, Void, Boolean> {
     private static String[] fileHashes = new String[GIDS.length];

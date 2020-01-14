@@ -6,6 +6,8 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.krishnamurthi.saratogahightrophyapplication.database.AppDatabase;
+
 public class LaunchActivity extends AppCompatActivity {
 
     @Override
@@ -18,7 +20,7 @@ public class LaunchActivity extends AppCompatActivity {
             if(task.execute().get()) {
                 // There are changes to the spreadsheets, so recreate the DB
                 progress.setText(R.string.progress_bar_database_recreation);
-                DatabaseManager.createDB();
+                AppDatabase db = AppDatabase.getInstance(getApplicationContext());
             } else { startActivity(new Intent(LaunchActivity.this, FullscreenActivity.class)); }
         } catch (Exception e) { e.printStackTrace(); }
     }

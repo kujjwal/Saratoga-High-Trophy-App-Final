@@ -10,4 +10,9 @@ import androidx.room.PrimaryKey;
     @PrimaryKey @ColumnInfo(name = "rowid") public int id;
     @ColumnInfo(name = "Sports") public String sport_name;
     @ColumnInfo(name = "Image_URL") public String image_url;
+
+    public Sport(String sport_name, String image_url) {
+        this.sport_name = sport_name;
+        this.image_url = image_url;
+    }
 }
