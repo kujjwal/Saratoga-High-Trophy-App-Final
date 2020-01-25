@@ -8,4 +8,5 @@
     <string name="progress_bar_starting_dialog">Launching&#8230;</string>
     <string name="progress_bar_asynctask_dialog">Downloading Database</string>
     <string name="progress_bar_database_recreation">Updating Database for New Changes</string>
+    <string name="progress_bar_completed_database_setup">Setting UI for Updated Database</string>
 </resources>

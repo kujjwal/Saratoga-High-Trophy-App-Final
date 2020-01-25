@@ -21,6 +21,9 @@ public class LaunchActivity extends AppCompatActivity {
                 // There are changes to the spreadsheets, so recreate the DB
                 progress.setText(R.string.progress_bar_database_recreation);
                 AppDatabase db = AppDatabase.getInstance(getApplicationContext());
+                if(db != null) {
+                    progress.setText(R.string.progress_bar_completed_database_setup);
+                }
             } else { startActivity(new Intent(LaunchActivity.this, FullscreenActivity.class)); }
         } catch (Exception e) { e.printStackTrace(); }
     }
