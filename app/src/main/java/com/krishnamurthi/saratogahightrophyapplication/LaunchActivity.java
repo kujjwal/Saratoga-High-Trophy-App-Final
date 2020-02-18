@@ -1,5 +1,6 @@
 package com.krishnamurthi.saratogahightrophyapplication;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.widget.TextView;
@@ -37,6 +38,8 @@ public class LaunchActivity extends AppCompatActivity {
             } else {
                 progress.setText("Instantiating DB with No Changes");
                 AppDatabase.getInstance(getApplicationContext(), Status.NO_CHANGES);
+                Intent i = new Intent(LaunchActivity.this, FullscreenActivity.class);
+                startActivity(i);
             }
         } catch (Exception e) { e.printStackTrace(); }
     }

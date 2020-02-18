@@ -21,17 +21,25 @@ class DatabaseManager {
         try {
             Scanner scanner = new Scanner(new File(Environment.getExternalStorageDirectory().toString()
                     + titles[0] + ".csv"));
+            Scanner scanner1 = new Scanner(new File(Environment.getExternalStorageDirectory().toString()
+                    + "cache/" + titles[0] + ".csv"));
             boolean first = true;
             while (scanner.hasNext()) {
                 List<String> line = parseLine(scanner.nextLine());
                 if (first) first = false; //Column Headers
                 else {
-                    if(mChanges) {
+                    if (mChanges && scanner1.hasNext()) {
+                        List<String> line2 = parseLine(scanner1.nextLine());
+                        if (!new Sport(line2.get(0), line2.get(1)).equals(new Sport(line.get(0), line.get(1)))) {
+                            sports.add(new Sport(line.get(0), line.get(1)));
+                        }
                         // Check if the sport data line is new or in old database
                     } else sports.add(new Sport(line.get(0), line.get(1)));
                 }
             }
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return sports.toArray(new Sport[0]);
     }
 
@@ -39,22 +47,38 @@ class DatabaseManager {
         List<Trophy> trophies = new ArrayList<>();
         try {
             Scanner scanner = new Scanner(new File(Environment.getExternalStorageDirectory().toString()
-                    + titles[0] + ".csv"));
+                    + titles[1] + ".csv"));
+            Scanner scanner1 = new Scanner(new File(Environment.getExternalStorageDirectory().toString()
+                    + "cache/" + titles[1] + ".csv"));
             boolean first = true;
             while (scanner.hasNext()) {
                 List<String> line = parseLine(scanner.nextLine());
+                List<String> line2 = parseLine(scanner1.nextLine());
                 if (first) first = false;
                 else {
                     String[] players = line.get(4).split(",");
-                    for(String player : players) {
-                        if(mChanges) {
+                    String[] players1 = line2.get(4).split(",");
+
+                    for (int i = 0; i < players.length; i++) {
+                        String player = players[i];
+                        String player2 = players1[i];
+                        if (mChanges && scanner1.hasNext()) {
+                            if (!new Trophy(line2.get(0), Integer.parseInt(line2.get(1)),
+                                    line2.get(2), line2.get(3), player2, line2.get(5)).equals(
+                                    new Trophy(line.get(0), Integer.parseInt(line.get(1)),
+                                            line.get(2), line.get(3), player, line.get(5)))) {
+                                trophies.add(new Trophy(line2.get(0), Integer.parseInt(line2.get(1)),
+                                        line2.get(2), line2.get(3), player2, line2.get(5)));
+                            }
                             // Check if the sport data line is new or in old database
                         } else trophies.add(new Trophy(line.get(0), Integer.parseInt(line.get(1)),
                                 line.get(2), line.get(3), player, line.get(5)));
                     }
                 }
             }
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return trophies.toArray(new Trophy[0]);
     }
 }
