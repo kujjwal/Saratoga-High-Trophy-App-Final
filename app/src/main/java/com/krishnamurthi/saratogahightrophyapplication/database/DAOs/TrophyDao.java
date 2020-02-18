@@ -1,4 +1,4 @@
-package com.krishnamurthi.saratogahightrophyapplication.database.daos;
+package com.krishnamurthi.saratogahightrophyapplication.database.DAOs;
 
 import androidx.room.Dao;
 import androidx.room.Delete;

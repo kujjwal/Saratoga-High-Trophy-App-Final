@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.util.Log;
 import android.widget.TextView;
 
 import java.io.BufferedInputStream;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -24,12 +26,13 @@ import java.util.Set;
 
 import static com.krishnamurthi.saratogahightrophyapplication.utils.Constants.*;
 
-public class DatabaseDownloadTask extends AsyncTask<Void, Void, Boolean> {
+public class CSVDownloadTask extends AsyncTask<Void, Void, Boolean> {
+    private static final String TAG = "CSVDownloadTask";
     private static String[] fileHashes = new String[GIDS.length];
     private WeakReference<Activity> foregroundActivity;
 
 
-    DatabaseDownloadTask(Activity activity) {
+    CSVDownloadTask(Activity activity) {
         this.foregroundActivity = new WeakReference<>(activity);
     }
 
@@ -73,26 +76,34 @@ public class DatabaseDownloadTask extends AsyncTask<Void, Void, Boolean> {
 
     private void saveCSVs(String string, String title, int iteration) throws IOException, NoSuchAlgorithmException {
         URL url = new URL(string);
-        url.openConnection().connect();
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        int responseCode = conn.getResponseCode();
 
-        MessageDigest md = MessageDigest.getInstance("SHA-1");
-        File csv = new File(Environment.getExternalStorageDirectory().toString() + title + ".csv");
-        InputStream input = new BufferedInputStream(url.openStream(),8192);
-        OutputStream output = new FileOutputStream(csv);
+        if(responseCode == HttpURLConnection.HTTP_OK) {
+            conn.connect();
 
-        byte[] data = new byte[1024]; int count;
-        while ((count = input.read(data)) != -1) {
-            output.write(data, 0, count);
-            md.update(data, 0, count);
+            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            File csv = new File(Environment.getExternalStorageDirectory().toString() + title + ".csv");
+            InputStream input = new BufferedInputStream(url.openStream(),8192);
+            OutputStream output = new FileOutputStream(csv);
+
+            byte[] data = new byte[1024]; int count;
+            while ((count = input.read(data)) != -1) {
+                output.write(data, 0, count);
+                md.update(data, 0, count);
+            }
+            output.flush(); output.close(); input.close();
+
+            byte[] bytes = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for(byte by : bytes) {
+                sb.append(Integer.toString((by & 0xff) + 0x100, 16).substring(1));
+            }
+            fileHashes[iteration] = sb.toString();
+            //filePaths[iteration] = csv.getAbsolutePath(); //Filepaths not necessary since they stay constant
+        } else {
+            // TODO: Insert Error Message that URL Doesn't Work
+            Log.e(TAG, "Response Code: " + responseCode);
         }
-        output.flush(); output.close(); input.close();
-
-        byte[] bytes = md.digest();
-        StringBuilder sb = new StringBuilder();
-        for(byte by : bytes) {
-            sb.append(Integer.toString((by & 0xff) + 0x100, 16).substring(1));
-        }
-        fileHashes[iteration] = sb.toString();
-        //filePaths[iteration] = csv.getAbsolutePath(); //Filepaths not necessary since they stay constant
     }
 }

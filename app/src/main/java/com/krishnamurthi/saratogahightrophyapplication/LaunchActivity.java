@@ -1,30 +1,43 @@
 package com.krishnamurthi.saratogahightrophyapplication;
 
-import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.krishnamurthi.saratogahightrophyapplication.database.AppDatabase;
+import com.krishnamurthi.saratogahightrophyapplication.database.Status;
+import com.krishnamurthi.saratogahightrophyapplication.utils.Constants;
+
+import java.io.File;
 
 public class LaunchActivity extends AppCompatActivity {
+
+    //TODO: Figure out the flags that go with the progress dialog text
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launch);
-        DatabaseDownloadTask task = new DatabaseDownloadTask(this);
+        CSVDownloadTask task = new CSVDownloadTask(this);
         TextView progress = findViewById(R.id.progress_text);
         try {
             if(task.execute().get()) {
-                // There are changes to the spreadsheets, so recreate the DB
-                progress.setText(R.string.progress_bar_database_recreation);
-                AppDatabase db = AppDatabase.getInstance(getApplicationContext());
-                if(db != null) {
-                    progress.setText(R.string.progress_bar_completed_database_setup);
+                for(String title : Constants.titles) {
+                    String filePath = Environment.getExternalStorageDirectory().toString() + "cache/" + title + ".db";
+                    if(new File(filePath).exists()) {
+                        progress.setText("Finding Specific DB Changes");
+                        AppDatabase.getInstance(getApplicationContext(), Status.CHANGES);
+                    } else {
+                        progress.setText("Creating New Database");
+                        AppDatabase.getInstance(getApplicationContext(), Status.NEW);
+                    }
                 }
-            } else { startActivity(new Intent(LaunchActivity.this, FullscreenActivity.class)); }
+            } else {
+                progress.setText("Instantiating DB with No Changes");
+                AppDatabase.getInstance(getApplicationContext(), Status.NO_CHANGES);
+            }
         } catch (Exception e) { e.printStackTrace(); }
     }
 }
