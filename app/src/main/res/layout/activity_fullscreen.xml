@@ -35,15 +35,23 @@
             android:layout_gravity="bottom|center_horizontal"
             android:background="@color/black_overlay"
             android:orientation="horizontal"
+            android:baselineAligned="false"
             tools:ignore="UselessParent">
 
-            <Button
+            <!--<Button
                 android:id="@+id/dummy_button"
                 style="?metaButtonBarButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/dummy_button" />
+                android:text="@string/dummy_button" />-->
+
+            <fragment
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:name="com.krishnamurthi.saratogahightrophyapplication.CardFragment"
+                android:id="@+id/headlines_fragment"
+                android:layout_weight="1"/>
 
         </LinearLayout>
     </FrameLayout>
